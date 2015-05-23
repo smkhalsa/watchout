@@ -19,7 +19,8 @@ var axes = {
 
 var gameBoard = d3.select('.gameBoard').append('svg:svg')
                 .attr('width', gameOptions.width)
-                .attr('height', gameOptions.height);
+                .attr('height', gameOptions.height)
+                .attr('class', 'svg');
 
 var updateScore = function() {
         d3.select('.current').select('span').text(gameStats.score.toString());
@@ -30,21 +31,25 @@ var updateBestScore = function() {
   d3.select(".high").select('span').text(gameStats.bestScore.toString());
 }
 
+// player
 
 var Player = function(gameOptions) {
-  this.path = 'm-7.5,1.62413c0,-5.04095 4.08318,-9.12413 9.12414,-9.12413c5.04096,0 9.70345,5.53145 11.87586,9.12413c-2.02759,2.72372 -6.8349,9.12415 -11.87586,9.12415c-5.04096,0 -9.12414,-4.08318 -9.12414,-9.12415z';
   this.fill = '#ff6600';
-  this.x = 0;
-  this.y = 0;
+  this.x = axes.x(50);
+  this.y = axes.y(50);
   this.angle = 0;
-  this.r = 5;
+  this.r = 20;
+  this.el = gameBoard.append('svg:circle')
+            .attr('r', this.r)
+            .attr('fill', this.fill)
+            .attr('cx', this.x)
+            .attr('cy', this.y)
+            .attr('class', 'player')
+
+
 
   this.gameOptions = gameOptions;
 
-}
-
-Player.prototype.render = function(container){
-  container.append()
 }
 
 Player.prototype.getX = function(){
@@ -64,6 +69,7 @@ Player.prototype.setX = function(x){
 Player.prototype.getY = function(){
   return this.y;
 }
+
 Player.prototype.setY = function(y){
   var minY = this.gameOptions.padding;
   var maxY = this.gameOptions.width - this.gameOptions.padding;
@@ -75,7 +81,81 @@ Player.prototype.setY = function(y){
   this.y = y;
 }
 
+var player = new Player(gameOptions);
+
+var move = function(x, y){
+  this.attr('cx', x)
+  player.x = x;
+  this.attr('cy', y)
+  player.y = y;
+}
+
+player.el.call(
+  d3.behavior.drag()
+  .on('drag', function(){
+  move.call(player.el, d3.event.x, d3.event.y);
+})
+);
+
+// Enemies
+
+var enemies = [];
+
+var createEnemies = function() {
+  for (var i = 0; i < gameOptions.nEnemies; i++) {
+    var enemy = {
+      x: axes.x(Math.random() * 100),
+      y: axes.y(Math.random() * 100)
+    }
+    enemies.push(enemy);
+  }
+}
+
+createEnemies();
+
+gameBoard.selectAll('.enemy')
+  .data(enemies)
+  .enter()
+  .append('circle')
+  .attr('cx', function(d) {
+    return d.x;
+  })
+  .attr('cy', function(d) {
+    return d.y;
+  })
+  .attr('class', 'enemy')
+  .attr('r', 10)
+
+var shuffleX(d,i){
+  enemies[i].x = axes.x(Math.random() * 100)
+  return d
+}
+
+var shuffleEnemies = function() {
+  gameBoard.selectAll('.enemy')
+  .transition()
+  .delay(function(d,i) {return i * 50;})
+  .duration(1000)
+  .attr('cx', function(d) { })
+  .attr('cy', function(d) { return axes.y(Math.random() * 100)})
+  .each('end', shuffleEnemies)
+}
+
+shuffleEnemies();
+
+// Collision detection
+var enemy =
+
+var collisionDetection = function(enemy, collidedCallback) {
+  var radiusSum = 10 + player.r;
+  var xDiff =
+}
 
 
+
+// for each enemy
+  // compare position to player
+  // if the distance between their centers is less than sum of their radii
+    // then collision occures (reset score)
 
 
