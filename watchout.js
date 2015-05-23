@@ -3,13 +3,14 @@
 var gameOptions = {
   height: 450,
   width: 700,
-  nEnemies: 30,
+  nEnemies: 20,
   padding: 20
 }
 
 var gameStats ={
   score: 0,
-  bestScore: 0
+  bestScore: 0,
+  collisions: 0
 }
 
 var axes = {
@@ -29,6 +30,7 @@ var updateScore = function() {
 var updateBestScore = function() {
   gameStats.bestScore = Math.max(gameStats.bestScore, gameStats.score);
   d3.select(".high").select('span').text(gameStats.bestScore.toString());
+  d3.select(".collisions").select('span').text(gameStats.collisions.toString());
 }
 
 // player
@@ -126,29 +128,47 @@ gameBoard.selectAll('.enemy')
   .attr('class', 'enemy')
   .attr('r', 10)
 
-var shuffleX(d,i){
-  enemies[i].x = axes.x(Math.random() * 100)
-  return d
-}
+
 
 var shuffleEnemies = function() {
   gameBoard.selectAll('.enemy')
   .transition()
   .delay(function(d,i) {return i * 50;})
   .duration(1000)
-  .attr('cx', function(d) { })
+  .tween('getPosition', function() {
+    var thisEnemy = d3.select(this);
+    return function(t) {
+      gameStats.score++;
+      updateScore();
+      console.log(thisEnemy.attr('cx'))
+      var currentX = thisEnemy.attr('cx');
+      var currentY = thisEnemy.attr('cy');
+
+      checkCollision.call(thisEnemy, currentX, currentY, player.x, player.y );
+    }
+  })
+  .attr('cx', function(d) { return axes.x(Math.random() * 100)})
   .attr('cy', function(d) { return axes.y(Math.random() * 100)})
   .each('end', shuffleEnemies)
 }
 
 shuffleEnemies();
 
-// Collision detection
-var enemy =
+// Collision detection function
 
-var collisionDetection = function(enemy, collidedCallback) {
-  var radiusSum = 10 + player.r;
-  var xDiff =
+var checkCollision = function(enemyX, enemyY, playerX, playerY) {
+  var radiusSum = parseInt(this.attr('r')) + player.r;
+  var xDiff = enemyX-playerX;
+  var yDiff = enemyY-playerY;
+  var distance = Math.sqrt(Math.pow(xDiff, 2)+Math.pow(yDiff,2))
+  if(distance < radiusSum){
+    console.log(this.attr('r'), player.r, radiusSum);
+    // debugger;
+    updateBestScore();
+    gameStats.score = 0;
+    updateScore();
+    gameStats.collisions++;
+  }
 }
 
 
