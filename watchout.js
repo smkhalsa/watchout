@@ -1,4 +1,29 @@
+//Use YOUR Firebase URL (not the one below)
+  var fb = new Firebase("https://d3asteroid.firebaseio.com");
+
+  /* Remember to include firebase JS Library
+  <script src="https://cdn.firebase.com/js/client/2.2.5/firebase.js"></script>
+  */
+
+fb.set({test: "we did it!!!"})
 // start slingin' some d3 here.
+var gameStats = fb.child("gameStats");
+
+fb.set({
+  gameStats: {
+    score: 0,
+    bestScore: 0,
+    collisions: 0
+  }
+});
+gameStats.update({ score : 10 });
+
+var score = gameStats.child('score');
+
+score.on("value", function(data) {
+  d3.select('.current').select('span').text(data.val().toString());
+});
+
 
 var gameOptions = {
   height: 450,
@@ -7,11 +32,11 @@ var gameOptions = {
   padding: 20
 }
 
-var gameStats ={
-  score: 0,
-  bestScore: 0,
-  collisions: 0
-}
+// var gameStats = {
+//   score: 0,
+//   bestScore: 0,
+//   collisions: 0
+// }
 
 var axes = {
   x: d3.scale.linear().domain([0,100]).range([0,gameOptions.width]),
@@ -24,8 +49,11 @@ var gameBoard = d3.select('.gameBoard').append('svg:svg')
                 .attr('class', 'svg');
 
 var updateScore = function() {
-        d3.select('.current').select('span').text(gameStats.score.toString());
+
+
 }
+
+
 
 var updateBestScore = function() {
   gameStats.bestScore = Math.max(gameStats.bestScore, gameStats.score);
@@ -140,7 +168,7 @@ var shuffleEnemies = function() {
     return function(t) {
       gameStats.score++;
       updateScore();
-      console.log(thisEnemy.attr('cx'))
+      //console.log(thisEnemy.attr('cx'))
       var currentX = thisEnemy.attr('cx');
       var currentY = thisEnemy.attr('cy');
 
@@ -162,7 +190,7 @@ var checkCollision = function(enemyX, enemyY, playerX, playerY) {
   var yDiff = enemyY-playerY;
   var distance = Math.sqrt(Math.pow(xDiff, 2)+Math.pow(yDiff,2))
   if(distance < radiusSum){
-    console.log(this.attr('r'), player.r, radiusSum);
+    //console.log(this.attr('r'), player.r, radiusSum);
     // debugger;
     updateBestScore();
     gameStats.score = 0;

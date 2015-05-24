@@ -1,0 +1,9 @@
+{
+  "firebase": "d3asteroid",
+  "public": ".",
+  "ignore": [
+    "firebase.json",
+    "**/.*",
+    "**/node_modules/**"
+  ]
+}
